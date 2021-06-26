@@ -1,10 +1,56 @@
-<%- include("partials/header") %>
-<a href="/signup" role="button">Register</a>
-<form action="/login" method="post">
-    <input type="email" name="username">
-    <input type="password" name="password">
-    <button type="submit">Login</button>
-</form>
-<a href="/auth/google" role="button">Signup with google</a>
-<a href="/auth/facebook" role="button">Signup with facebook</a>
-<%- include("partials/footer") %> 
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Sanchit">
+    <meta name="generator" content="">
+    <title>To Do List</title>
+    
+
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    
+
+<meta name="theme-color" content="#d89fe9">
+
+
+    
+    
+    <link href="/css/signin.css" rel="stylesheet">
+  </head>
+  <body class="text-center">
+    
+<main class="form-signin">
+  <form action="/login" method="post">
+    <h1 class="h1 mb-3 fw-normal">Sign In</h1>
+    <p>New member? <a href="/signup" role="button">Signup</a></p>
+    <div class="form-floating">
+      <input type="username" class="form-control" id="floatingInput" placeholder="name@example.com" name="username" required>
+      <label for="floatingInput">Email address</label>
+    </div>
+    <div class="form-floating">
+      <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" required>
+      <label for="floatingPassword">Password</label>
+    </div>
+
+    <!-- <div class="checkbox mb-3">
+      <label>
+        <input type="checkbox" value="remember-me"> Remember me
+      </label>
+    </div> -->
+    <button class="w-100 btn btn-lg btn-primary button" type="submit">Sign in</button></form>
+    <div>
+        <a class="w-100 btn btn-primary facebook button" href="/auth/facebook" role="button"><img class="float-start" src="/icons/facebook.png" alt="f"> Sign in with Facebook</a>
+    </div>
+    <div>
+        <a class="w-100 btn btn-primary google button" href="/auth/google" role="button"><img class="float-start" src="/icons/google.png" alt="G"> Sign in with Google</a>
+    </div>
+    <p class="mt-5 mb-3 text-muted">&copy; Sanchit</p>
+  
+</main>
+  </body>
+</html>

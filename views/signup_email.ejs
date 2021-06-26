@@ -25,19 +25,24 @@
   <body class="text-center">
     
 <main class="form-signin">
-    <h1 class="mb-3 fw-normal">Sign Up</h1>
+  <form action="/signup" method="post">
+    <h1 class="h1 mb-3 fw-normal">Sign Up</h1>
     <p>Already a member? <a href="/login" role="button">Login</a></p>
-    <div>
-        <a class="w-100 btn btn-primary facebook button" href="/auth/facebook" role="button"><img class="float-start" src="/icons/facebook.png" alt="f">Sign up with Facebook</a>
+    <div class="form-floating">
+      <input type="username" class="form-control" id="floatingInput" placeholder="name@example.com" name="username" required>
+      <label for="floatingInput">Email address</label>
     </div>
-        <a class="w-100 btn btn-primary google button" href="/auth/google" role="button"><img class="float-start" src="/icons/google.png" alt="G">Sign up with Google</a>
+    <div class="form-floating">
+      <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" required>
+      <label for="floatingPassword">Password</label>
     </div>
-    <div>
-        <p class="line">or</p>
-    </div>
-    </div>
-        <a class="w-100 btn btn-outline-dark button" href="/signup/email" role="button">Sign up with Email</a>
-    </div>
+
+    <!-- <div class="checkbox mb-3">
+      <label>
+        <input type="checkbox" value="remember-me"> Remember me
+      </label>
+    </div> -->
+    <button class="w-100 btn btn-lg btn-primary button" type="submit">Sign Up</button>
     <p class="mt-5 mb-3 text-muted">&copy; Sanchit</p>
   </form>
 </main>

@@ -131,7 +131,7 @@ app.get('/', (req, res) => {
       })
     }
     else{
-        res.redirect("/login");
+        res.redirect("/signup");
     }
 });
 
@@ -187,18 +187,22 @@ app.get("/lists/:topic", function(req,res){
     }
   }
   else{
-    res.redirect("/login");
+    res.redirect("/singup");
   }
 })
 
 app.get("/logout", (req,res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect('/login');
 })
 
 app.get("/signup", function(req, res){
     res.render("signup");
 });
+
+app.get("/signup/email", function(req,res){
+  res.render("signup_email");
+})
 
 app.get("/login", function(req,res){
     res.render("login");
@@ -299,7 +303,9 @@ app.post("/login", function(req, res){
             res.redirect("/login");
         }
         else{
-            res.redirect("/");
+            passport.authenticate("local")(req, res, function(){
+              res.redirect("/");
+            })
         }
     })
 });
