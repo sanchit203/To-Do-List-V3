@@ -29,6 +29,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(require('flash')());
 
 mongoose.connect("mongodb://localhost:27017/loginDB",{useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true});
 
@@ -305,7 +306,7 @@ app.post("/login", function(req, res){
         else{
             passport.authenticate("local")(req, res, function(){
               res.redirect("/");
-            })
+            });
         }
     })
 });
