@@ -12,6 +12,7 @@ const fs = require('fs');
 const key = fs.readFileSync(__dirname+'/localhost-key.pem');
 const cert = fs.readFileSync(__dirname+'/localhost.pem');
 const https = require('https');
+const lodash = require("lodash");
 
 const app = express();
 const port = 3000;
@@ -19,10 +20,10 @@ const server = https.createServer({ key, cert }, app);
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("public"));
+app.use(express.static(__dirname+"/public"));
 
 app.use(session({
-    secret: 'Thisisasecret',
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false
 }));
@@ -31,11 +32,26 @@ app.use(passport.session());
 
 mongoose.connect("mongodb://localhost:27017/loginDB",{useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true});
 
+const itemSchema = {
+  userId : String,
+  name : String
+}
+
+const Item = mongoose.model("Item", itemSchema);
+
+const listSchema = {
+  userId : String,
+  name : String,
+  title : String
+}
+
+const List =mongoose.model("List", listSchema);
+
 const userSchema = new mongoose.Schema({
     username : String,
     password : String,
     googleId : String,
-    facebookId : String
+    facebookId : String,
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -82,12 +98,98 @@ passport.use(new FacebookStrategy({
 app.get('/', (req, res) => {
     if(req.isAuthenticated())
     {
-        res.send("<h1>secret</h1>");
+      const loggedUser = req.user;
+      Item.find({userId : loggedUser._id}, function(err, founditems){
+        if(founditems.length==0)
+        {
+          const item1 = new Item({
+            userId : loggedUser._id,
+            name : "Welecome to your todolist!"
+          });
+          
+          const item2 = new Item({
+            userId : loggedUser._id,
+            name : "Hit the + button to add a new item."
+          })
+          
+          const item3 = new Item({
+            userId : loggedUser._id,
+            name : "<--Hit this to delete an item."
+          });
+
+          const defaultItems = [item1, item2, item3];
+          Item.insertMany(defaultItems, function(err){
+            if(err){
+              log(err);
+            }
+            res.redirect("/");
+          })
+        }
+        else{
+          res.render("list", {listTitle : "Today", items : founditems});
+        }
+      })
     }
     else{
         res.redirect("/login");
     }
 });
+
+app.get("/lists/:topic", function(req,res){
+  if(req.isAuthenticated()){
+    const loggedUser= req.user;
+    const requestedList = lodash.lowerCase(req.params.topic);
+    if(requestedList=== "Today")
+    {
+      res.redirect("/");
+    }
+    else{
+      List.find({title : requestedList, userId: req.user._id}, function(err, listItems){
+        if(!err)
+        {
+          if(listItems.length===0){
+            const item1 = new List({
+              userId : loggedUser._id,
+              name : "Welecome to your todolist!",
+              title : requestedList
+            });
+
+            const item2 = new List({
+              userId : loggedUser._id,
+              name : "Hit the + button to add a new item.",
+              title : requestedList
+            })
+
+            const item3 = new List({
+              userId : loggedUser._id,
+              name : "<--Hit this to delete an item.",
+              title : requestedList
+            });
+
+            const defaultItems = [item1, item2, item3];
+
+            List.insertMany(defaultItems, function(err){
+              if(err){
+                console.log(err);
+              }
+              res.redirect("/lists/"+req.params.topic);
+            })
+          }
+          else{
+            res.render("list", {listTitle : lodash.upperCase(requestedList), items : listItems});
+          }
+        }
+        else{
+          console.log(err);
+          res.redirect("/");
+        }
+      })
+    }
+  }
+  else{
+    res.redirect("/login");
+  }
+})
 
 app.get("/logout", (req,res) => {
   req.logout();
@@ -118,8 +220,59 @@ app.get('/auth/facebook/secrets',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
     res.redirect('/');
-  });
+});
 
+app.post("/", function(req, res){
+  const loggedUser = req.user;
+  const requestedList = lodash.lowerCase(req.body.list);
+  if(requestedList==="today")
+  {
+    const newItem = new Item({
+      userId : loggedUser._id,
+      name: req.body.todoitem
+    });
+    newItem.save(function(err){
+      if(err){
+        console.log(err);
+      }
+      res.redirect("/");
+    });
+  }
+  else{
+    const newItem = new List({
+      userId : loggedUser._id,
+      name : req.body.todoitem,
+      title : requestedList
+    });
+    newItem.save(function(err){
+      if(err){
+        console.log(err);
+      }
+      res.redirect("/lists/"+lodash.kebabCase(requestedList));
+    });
+  }
+});
+
+app.post("/delete", function(req, res){
+  const itemId = req.body.deleteItem;
+  const requestedList = lodash.lowerCase(req.body.listTitle);
+  if(requestedList==="today"){
+    Item.findByIdAndDelete(itemId, function(err){
+      if(err){
+        console.log(err);
+      }
+      res.redirect("/");
+    })
+  }
+  else{
+    List.findByIdAndDelete(itemId, function(err){
+      if(err){
+        console.log(err);
+      }
+      res.redirect("/lists/"+lodash.kebabCase(requestedList));
+    })
+  }
+});
 
 app.post("/signup", function(req,res){
     User.register({username : req.body.username}, req.body.password, function(err, user){
